@@ -2,9 +2,8 @@ import { useWebSocket } from "./hooks/useWebSocket";
 import { Plaza } from "./components/Plaza";
 import "./App.css";
 
-const WS_URL = import.meta.env.DEV
-  ? "ws://localhost:8787/ws"
-  : `wss://${window.location.host}/ws`;
+const WS_URL: string = import.meta.env.VITE_BACKEND_WS_URL || "http://localhost:8787/ws";
+
 
 function App() {
   const { isConnected, myUserId, send, subscribe } = useWebSocket(WS_URL);
