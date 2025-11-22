@@ -2,10 +2,7 @@ name: Deploy
 on:
   push:
     branches:
-      - main
-    paths:
-      - 'backend/**'
-      - 'packages/shared/**'
+      - master
 jobs:
   deploy:
     runs-on: ubuntu-latest
