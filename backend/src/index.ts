@@ -35,6 +35,7 @@ export class RootRoom {
 
     const userId = crypto.randomUUID();
     
+    // Set initial position
     const initialX = 400;
     const initialY = 300;
     
