@@ -6,6 +6,7 @@ export function useWebSocket(url: string) {
   const [myUserId, setMyUserId] = useState<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const listenersRef = useRef<((msg: ServerMessage) => void)[]>([]);
+  const initMessageRef = useRef<ServerMessage | null>(null);
 
   useEffect(() => {
     const ws = new WebSocket(url);
@@ -13,7 +14,6 @@ export function useWebSocket(url: string) {
 
     ws.onopen = () => {
       setIsConnected(true);
-      console.log("WebSocket connected");
     };
 
     ws.onmessage = (event) => {
@@ -21,6 +21,7 @@ export function useWebSocket(url: string) {
       
       if (msg.type === "init") {
         setMyUserId(msg.userId);
+        initMessageRef.current = msg;
       }
 
       listenersRef.current.forEach((listener) => listener(msg));
@@ -28,7 +29,6 @@ export function useWebSocket(url: string) {
 
     ws.onclose = () => {
       setIsConnected(false);
-      console.log("WebSocket disconnected");
     };
 
     ws.onerror = (error) => {
@@ -48,6 +48,12 @@ export function useWebSocket(url: string) {
 
   const subscribe = (listener: (msg: ServerMessage) => void) => {
     listenersRef.current.push(listener);
+    
+    // If init message was already received, send it to the new listener
+    if (initMessageRef.current) {
+      listener(initMessageRef.current);
+    }
+    
     return () => {
       listenersRef.current = listenersRef.current.filter((l) => l !== listener);
     };

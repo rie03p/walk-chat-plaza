@@ -10,9 +10,15 @@ export interface Position {
   y: number;
 }
 
+export interface UserState {
+  id: string;
+  x: number;
+  y: number;
+}
+
 export type ServerMessage =
-  | { type: "init"; userId: string; users: string[] }
-  | { type: "join"; userId: string }
+  | { type: "init"; userId: string; x: number; y: number; users: UserState[] }
+  | { type: "join"; userId: string; x: number; y: number }
   | { type: "leave"; userId: string }
   | { type: "move"; userId: string; x: number; y: number }
   | { type: "chat"; userId: string; message: string };

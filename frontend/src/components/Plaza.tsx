@@ -32,15 +32,18 @@ export function Plaza({ myUserId, subscribe, onMove }: PlazaProps) {
   useEffect(() => {
     const unsubscribe = subscribe((msg) => {
       if (msg.type === "init") {
-        // Initialize other users at random positions
+        // Set my initial position from server
+        setMyPosition({ x: msg.x, y: msg.y });
+        
+        // Initialize other users with their actual positions
         const newUsers = new Map<string, User>();
-        msg.users.forEach((userId) => {
-          if (userId !== msg.userId) {
-            newUsers.set(userId, {
-              id: userId,
-              x: Math.random() * (CANVAS_WIDTH - AVATAR_SIZE),
-              y: Math.random() * (CANVAS_HEIGHT - AVATAR_SIZE),
-              name: `User ${userId.slice(0, 4)}`,
+        msg.users.forEach((userState) => {
+          if (userState.id !== msg.userId) {
+            newUsers.set(userState.id, {
+              id: userState.id,
+              x: userState.x,
+              y: userState.y,
+              name: `User ${userState.id.slice(0, 4)}`,
             });
           }
         });
@@ -51,8 +54,8 @@ export function Plaza({ myUserId, subscribe, onMove }: PlazaProps) {
           if (msg.userId !== myUserId) {
             next.set(msg.userId, {
               id: msg.userId,
-              x: Math.random() * (CANVAS_WIDTH - AVATAR_SIZE),
-              y: Math.random() * (CANVAS_HEIGHT - AVATAR_SIZE),
+              x: msg.x,
+              y: msg.y,
               name: `User ${msg.userId.slice(0, 4)}`,
             });
           }
@@ -70,6 +73,14 @@ export function Plaza({ myUserId, subscribe, onMove }: PlazaProps) {
           const user = next.get(msg.userId);
           if (user) {
             next.set(msg.userId, { ...user, x: msg.x, y: msg.y });
+          } else if (msg.userId !== myUserId) {
+            // Auto-add user if not exists (in case we missed the join message)
+            next.set(msg.userId, {
+              id: msg.userId,
+              x: msg.x,
+              y: msg.y,
+              name: `User ${msg.userId.slice(0, 4)}`,
+            });
           }
           return next;
         });

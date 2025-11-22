@@ -18,6 +18,7 @@ export default {
 
 export class RootRoom {
   users = new Map<string, WebSocket>();
+  userPositions = new Map<string, { x: number; y: number }>();
 
   constructor(public state: DurableObjectState) {}
 
@@ -34,21 +35,37 @@ export class RootRoom {
 
     const userId = crypto.randomUUID();
     
-    // Send init message to the new user with existing users (before adding to map)
+    const initialX = 400;
+    const initialY = 300;
+    
+    this.users.set(userId, server);
+    this.userPositions.set(userId, { x: initialX, y: initialY });
+    
+    const existingUsers = Array.from(this.users.keys())
+      .filter(uid => uid !== userId)
+      .map(uid => ({
+        id: uid,
+        x: this.userPositions.get(uid)?.x ?? 400,
+        y: this.userPositions.get(uid)?.y ?? 300,
+      }));
+    
     server.send(JSON.stringify({
       type: "init",
       userId,
-      users: [...this.users.keys()],
+      x: initialX,
+      y: initialY,
+      users: existingUsers,
     }));
 
-    // Add user to the map
-    this.users.set(userId, server);
-
-    // Broadcast join message to all other users
-    this.broadcast({ type: "join", userId });
+    // Broadcast join message to all other users with position
+    this.broadcast({ type: "join", userId, x: initialX, y: initialY });
 
     server.addEventListener("message", (event: MessageEvent) => {
       const msg = JSON.parse(event.data as string);
+
+      if (msg.type === "move") {
+        this.userPositions.set(userId, { x: msg.x, y: msg.y });
+      }
 
       this.broadcast({
         ...msg,
@@ -58,6 +75,7 @@ export class RootRoom {
 
     server.addEventListener("close", () => {
       this.users.delete(userId);
+      this.userPositions.delete(userId);
       this.broadcast({ type: "leave", userId });
     });
 
