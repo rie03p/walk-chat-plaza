@@ -1,0 +1,11 @@
+name = "plaza-backend"
+main = "src/index.ts"
+compatibility_date = "2025-11-22"
+
+[[durable_objects.bindings]]
+name = "ROOM"
+class_name = "RootRoom"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["RootRoom"]

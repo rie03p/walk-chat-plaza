@@ -1,16 +1,14 @@
 {
   "name": "plaza",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
+  "description": "Plaza - Full-stack application with Cloudflare Workers backend",
+  "packageManager": "pnpm@10.23.0",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev:backend": "pnpm --filter plaza-backend dev",
+    "deploy:backend": "pnpm --filter plaza-backend deploy"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@10.23.0",
-  "devDependencies": {
-    "wrangler": "^4.50.0"
-  }
+  "license": "ISC"
 }
